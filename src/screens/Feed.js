@@ -1,9 +1,15 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, Switch} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Switch,
+  SafeAreaView,
+  useWindowDimensions,
+} from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withTiming,
 } from 'react-native-reanimated';
 import ComfortableFeed from './ComfortableFeed';
@@ -11,45 +17,30 @@ import CompactFeed from './CompactFeed';
 
 const Feed = () => {
   const [view, setView] = useState('comfortable');
+  const {width: WindowWidth} = useWindowDimensions();
 
-  const comfortableFeedOpacity = useSharedValue(1);
-  const comfortableFeedZIndex = useSharedValue(1);
-  const compactFeedOpacity = useSharedValue(0);
-  const compactFeedZIndex = useSharedValue(0);
+  const translateX = useSharedValue(0);
 
-  const comfortableFeedAnimatedStyles = useAnimatedStyle(() => {
+  const feedContainerAnimatedStyles = useAnimatedStyle(() => {
     return {
-      opacity: comfortableFeedOpacity.value,
-      zIndex: comfortableFeedZIndex.value,
-    };
-  });
-  const compactFeedAnimatedStyles = useAnimatedStyle(() => {
-    return {
-      opacity: compactFeedOpacity.value,
-      zIndex: compactFeedZIndex.value,
+      transform: [{translateX: translateX.value}],
     };
   });
 
   const switchView = v => {
     if (v) {
       //compact
-      comfortableFeedOpacity.value = withTiming(0);
-      comfortableFeedZIndex.value = withTiming(0);
-      compactFeedOpacity.value = withDelay(500, withTiming(1));
-      compactFeedZIndex.value = withDelay(500, withTiming(1));
+      translateX.value = withTiming(-WindowWidth);
       setView('compact');
     } else {
       //comfortable
-      compactFeedOpacity.value = withTiming(0);
-      compactFeedZIndex.value = withTiming(0);
-      comfortableFeedOpacity.value = withDelay(500, withTiming(1));
-      comfortableFeedZIndex.value = withDelay(500, withTiming(1));
+      translateX.value = withTiming(0);
       setView('comfortable');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.switchContainer}>
         <Text style={styles.viewText}>Comfortable</Text>
         <Switch
@@ -60,17 +51,16 @@ const Feed = () => {
         />
         <Text style={styles.viewText}>Compact</Text>
       </View>
-      <View style={styles.feedsContainer}>
-        <Animated.View
-          style={[styles.feedContainer, comfortableFeedAnimatedStyles]}>
+      <Animated.View
+        style={[styles.feedsContainer, feedContainerAnimatedStyles]}>
+        <View style={styles.feedContainer}>
           <ComfortableFeed />
-        </Animated.View>
-        <Animated.View
-          style={[styles.feedContainer, compactFeedAnimatedStyles]}>
+        </View>
+        <View style={styles.feedContainer}>
           <CompactFeed />
-        </Animated.View>
-      </View>
-    </View>
+        </View>
+      </Animated.View>
+    </SafeAreaView>
   );
 };
 
@@ -91,16 +81,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '700',
   },
-  feedsContainer: {
-    flex: 1,
-  },
-  feedContainer: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
+  feedsContainer: {width: '200%', flexDirection: 'row', flex: 1},
+  feedContainer: {width: '50%', height: '100%'},
 });
 
 export default Feed;

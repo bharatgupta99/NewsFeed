@@ -1,11 +1,11 @@
 import React from 'react';
-import {View, Text, StyleSheet, Dimensions, Image} from 'react-native';
-
-const windowWidth = Dimensions.get('window').width;
-const cardMargin = 24;
-const cardSize = windowWidth / 2 - cardMargin;
+import {View, Text, StyleSheet, Image, useWindowDimensions} from 'react-native';
 
 const CompactView = ({item, index}) => {
+  const {width: windowWidth} = useWindowDimensions();
+  const cardMargin = 24;
+  const cardSize = windowWidth / 2 - cardMargin;
+
   return (
     <View
       style={[
@@ -13,10 +13,11 @@ const CompactView = ({item, index}) => {
         {marginLeft: index % 2 === 0 ? (cardMargin * 2) / 3 : cardMargin / 3},
         {marginRight: index % 2 === 0 ? cardMargin / 3 : (cardMargin * 2) / 3},
         {marginVertical: cardMargin / 4},
+        {width: cardSize, height: cardSize},
       ]}>
       <Image
         source={{uri: item.imageUrl}}
-        style={styles.image}
+        style={{width: cardSize, height: cardSize}}
         resizeMode="cover"
       />
       <View style={styles.createdAtContainer}>
@@ -30,16 +31,11 @@ const CompactView = ({item, index}) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: cardSize,
-    height: cardSize,
     borderRadius: 8,
     backgroundColor: 'white',
     alignItems: 'center',
     overflow: 'hidden',
-  },
-  image: {
-    width: cardSize,
-    height: cardSize,
+    elevation: 4,
   },
   createdAtContainer: {
     position: 'absolute',
