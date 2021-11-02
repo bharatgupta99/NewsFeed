@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     alignItems: 'center',
     overflow: 'hidden',
-    elevation: 4,
   },
   image: {
     width: cardSize,

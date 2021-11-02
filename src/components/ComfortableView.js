@@ -31,7 +31,6 @@ const styles = StyleSheet.create({
   container: {
     margin: 16,
     padding: 8,
-    elevation: 4,
     flexDirection: 'row',
     backgroundColor: 'white',
     borderRadius: 8,

@@ -1,47 +1,50 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, FlatList, Switch} from 'react-native';
-import ComfortableView from '../components/ComfortableView';
-import CompactView from '../components/CompactView';
-import {fetchNews} from '../helpers/newsApi';
-
-const NEWS_PER_PAGE = 20;
-
-const getStructuredData = data => {
-  return data.map(item => {
-    return {
-      imageUrl: item.imageUrl,
-      headline: item.headline,
-      summary: item.summary,
-      createdAt: item.createdAt,
-    };
-  });
-};
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Switch} from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
+import ComfortableFeed from './ComfortableFeed';
+import CompactFeed from './CompactFeed';
 
 const Feed = () => {
-  //  0 - Comfortable
-  //  1 - Compact
-  const [view, setView] = useState(0);
-  const [page, setPage] = useState(0);
-  const [structuredData, setStructuredData] = useState([]);
+  const [view, setView] = useState('comfortable');
 
-  useEffect(() => {
-    fetchNews(page, NEWS_PER_PAGE).then(data => {
-      setStructuredData(currentData => [
-        ...currentData,
-        ...getStructuredData(data),
-      ]);
-    });
-  }, [page]);
+  const comfortableFeedOpacity = useSharedValue(1);
+  const comfortableFeedZIndex = useSharedValue(1);
+  const compactFeedOpacity = useSharedValue(0);
+  const compactFeedZIndex = useSharedValue(0);
 
-  const switchView = () => {
-    setView(previousView => !previousView);
-  };
+  const comfortableFeedAnimatedStyles = useAnimatedStyle(() => {
+    return {
+      opacity: comfortableFeedOpacity.value,
+      zIndex: comfortableFeedZIndex.value,
+    };
+  });
+  const compactFeedAnimatedStyles = useAnimatedStyle(() => {
+    return {
+      opacity: compactFeedOpacity.value,
+      zIndex: compactFeedZIndex.value,
+    };
+  });
 
-  const renderItem = ({item, index}) => {
-    if (view) {
-      return <CompactView item={item} index={index} />;
+  const switchView = v => {
+    if (v) {
+      //compact
+      comfortableFeedOpacity.value = withTiming(0);
+      comfortableFeedZIndex.value = withTiming(0);
+      compactFeedOpacity.value = withDelay(500, withTiming(1));
+      compactFeedZIndex.value = withDelay(500, withTiming(1));
+      setView('compact');
     } else {
-      return <ComfortableView item={item} index={index} />;
+      //comfortable
+      compactFeedOpacity.value = withTiming(0);
+      compactFeedZIndex.value = withTiming(0);
+      comfortableFeedOpacity.value = withDelay(500, withTiming(1));
+      comfortableFeedZIndex.value = withDelay(500, withTiming(1));
+      setView('comfortable');
     }
   };
 
@@ -50,22 +53,23 @@ const Feed = () => {
       <View style={styles.switchContainer}>
         <Text style={styles.viewText}>Comfortable</Text>
         <Switch
-          trackColor={{false: '#767577', true: '#81b0ff'}}
           thumbColor={'#fff'}
           ios_backgroundColor="#3e3e3e"
           onValueChange={switchView}
-          value={view}
+          value={view === 'comfortable' ? false : true}
         />
         <Text style={styles.viewText}>Compact</Text>
       </View>
-      <FlatList
-        key={view ? 2 : 1}
-        data={structuredData}
-        renderItem={renderItem}
-        onEndReached={() => setPage(currentPage => currentPage + 1)}
-        extraData={view}
-        numColumns={view ? 2 : 1}
-      />
+      <View style={styles.feedsContainer}>
+        <Animated.View
+          style={[styles.feedContainer, comfortableFeedAnimatedStyles]}>
+          <ComfortableFeed />
+        </Animated.View>
+        <Animated.View
+          style={[styles.feedContainer, compactFeedAnimatedStyles]}>
+          <CompactFeed />
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -86,6 +90,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     color: 'white',
     fontWeight: '700',
+  },
+  feedsContainer: {
+    flex: 1,
+  },
+  feedContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 
