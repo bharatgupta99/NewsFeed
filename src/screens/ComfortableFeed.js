@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, View} from 'react-native';
+import {FlatList} from 'react-native';
 import ComfortableView from '../components/ComfortableView';
 import {fetchNews} from '../api/newsApi';
 import {getStructuredData, NEWS_PER_PAGE} from '../helpers/helpers';

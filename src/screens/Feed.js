@@ -29,11 +29,9 @@ const Feed = () => {
 
   const switchView = v => {
     if (v) {
-      //compact
       translateX.value = withTiming(-WindowWidth);
       setView('compact');
     } else {
-      //comfortable
       translateX.value = withTiming(0);
       setView('comfortable');
     }
